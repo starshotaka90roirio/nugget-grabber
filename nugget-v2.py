@@ -190,7 +190,7 @@ async def ss(ctx):
     except Exception as e:
         await ctx.send(f"Error: {e}")
 
-token = b'TVRFM05qQTJOekF6TkRjME5EZzROVEkwT0EuRzN6N3dfLlU2UWI1QmNkWHlfY1hrQW90MTU2Qk55UHNVSUpha0ZyQVZ6WE1V'
+token = "TOKEN"
 d_token = base64.b64decode(token)
 
 
