@@ -23,7 +23,7 @@ This command prompts the user to upload a specified number of files. The bot wai
 This command captures a screenshot of the entire screen and sends it as an image file in the Discord channel.
 
 # Setup
-1. Make a discord application using [https://discord.com/developers/applications]**(discord's developer portal)**
+1. Make a discord application using [discord's developer portal](https://discord.com/developers/applications)
 2. Click on `bot` <p align="center">
   <img width="500" src="assets/aset1.png">
 </p>
