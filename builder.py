@@ -44,7 +44,7 @@ while True:
         with open(filepath, 'w') as f:
             f.write(new_content)
         
-        subprocess.call(["pyinstaller", "--onefile", "--windowed", "etc/nugget-v2.py"])
+        subprocess.call(["pyinstaller", "--onefile", "--windowed", "nugget-v2.py"])
 
         break
     
@@ -69,7 +69,7 @@ while True:
         time.sleep(3)
 
         try:
-            subprocess.call(["python", "etc/obfuscate.py"])
+            subprocess.call(["python", "obfuscate.py"])
 
         except Exception as e:
             print("Something went wrong . . . Error: " + e)
@@ -77,7 +77,7 @@ while True:
         finally:
             print("Compiling file... Give it a moment . . .")
             time.sleep(3)
-            subprocess.call(["pyinstaller", "--onefile", "--windowed", "etc/Obfuscated_nugget-v2.py"])
+            subprocess.call(["pyinstaller", "--onefile", "--windowed", "Obfuscated_nugget-v2.py"])
             os.system("cls")
             print("All done!")
 
