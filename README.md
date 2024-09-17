@@ -33,8 +33,13 @@ This command captures a screenshot of the entire screen and sends it as an image
 5. Congrats! You built a bot! still not done though . . .
 6. Run `pip install -r packs.txt` in the command-line (this installs necessary libraries)
 7. Run `builder.bat`
-8. Go back to your discord bot page
+8. Go back to your discord bot page3
 9. Click on reset token then copy your token (DO NOT SHARE YOUR TOKEN! A TOKEN IS LIKE A PASSWORD TO YOUR BOT, IF SOMEONE GOT IT, ITS BAD!)
 10. Back to builder and paste your token
 11. Wait til' it builds
 12. Voila!
+
+
+# Protecting your token
+
+You might have concerns about the safety of your discord bot token. In other discord RATs the token is easily found by simply reverse engineering the EXE file. In other softwares, the token is stored in plaintext, making it easy to hack into your discord bot. However, nugget-grabber securly encrypts your token with a key encoded in an encoding software (which im not going to say the name of). This way it ensures the safety of your discord bot token.
