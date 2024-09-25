@@ -7,7 +7,7 @@ import os
 class Update:
     def __init__(self):
         # Declare new version and links
-        self.version = '2.0'
+        self.version = '2.0.1'
         self.zip = 'https://github.com/starshotaka90roirio/nugget-grabber/archive/refs/heads/main.zip'
         self.github_version = 'https://raw.githubusercontent.com/starshotaka90roirio/nugget-grabber/main/updater.py'
 
