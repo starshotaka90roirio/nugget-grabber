@@ -4,11 +4,16 @@ Nugget grabber is an advanced RAT (remote access trojan) which uses a discord se
 
 ## Content
 
+- [Patch notes](###Patch-notes)
 - [Disclaimer](##DISCLAIMER)
 - [Setup](#Setup)
 - [Commands](##Commands)
 - [TODO](###Upcoming)
-- 
+
+### Patch-notes
++ Added a new `.grab history` command
+- `.show processes` under development
++ `.kill` command
 
 
 ## DISCLAIMER
@@ -34,6 +39,8 @@ THIS IS DANGEROUS SOFTWARE THAT SHOULD NOT BE USED FOR HARM. THE CREATOR IS NOT 
 
 
 ## Commands
+`.kill <task-name>` Ends a process.
+
 .`ping` This command checks the bot's latency and responds with a message containing the latency in milliseconds.
 
 .`clear` This command allows the bot to delete a specified number of messages (including the command itself) from the channel where the command was issued.
