@@ -3,3 +3,4 @@ pycryptodome
 discord
 requests
 Pillow
+psutil
