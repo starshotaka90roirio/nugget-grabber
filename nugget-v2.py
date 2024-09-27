@@ -300,5 +300,6 @@ async def ls(ctx):
 token = 'TOKEN'
 d_token = base64.b64decode(token)
 
+test = "kslsifuusfh"
 
 bot.run(d_token.decode())
