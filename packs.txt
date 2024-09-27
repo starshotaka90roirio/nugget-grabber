@@ -4,3 +4,4 @@ discord
 requests
 Pillow
 psutil
+pycrypto
