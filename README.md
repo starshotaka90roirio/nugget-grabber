@@ -4,19 +4,19 @@ Nugget grabber is an advanced RAT (remote access trojan) which uses a discord se
 
 ## Content
 
-- [Patch notes](###Patch-notes)
-- [Disclaimer](##DISCLAIMER)
+- [Patch notes](#Patch-notes)
+- [Disclaimer](#DISCLAIMER)
 - [Setup](#Setup)
-- [Commands](##Commands)
-- [TODO](###Upcoming)
+- [Commands](#Commands)
+- [TODO](#Upcoming)
 
-### Patch-notes
+# Patch-notes
 + Added a new `.grab history` command
 - `.show processes` under development
 + `.kill` command
 
 
-## DISCLAIMER
+# DISCLAIMER
 
 THIS IS DANGEROUS SOFTWARE THAT SHOULD NOT BE USED FOR HARM. THE CREATOR IS NOT RESPONSIBLE FOR ANY DAMAGES. USING SOFTWARE LIKE THIS FOR HARM IS ILLEGAL, SO USE WITH CAUTION.
 
@@ -38,7 +38,7 @@ THIS IS DANGEROUS SOFTWARE THAT SHOULD NOT BE USED FOR HARM. THE CREATOR IS NOT 
 
 
 
-## Commands
+# Commands
 `.kill <task-name>` Ends a process.
 
 .`ping` This command checks the bot's latency and responds with a message containing the latency in milliseconds.
@@ -53,7 +53,7 @@ THIS IS DANGEROUS SOFTWARE THAT SHOULD NOT BE USED FOR HARM. THE CREATOR IS NOT 
 
 `.ss` (or .screenshot) This command captures a screenshot of the entire screen and sends it as an image file in the Discord channel.
 
-## Features
+# Features
 ### Nugget grabber is still under development, but it can still:
 - Steal **CHROME** passwords
 - Steal **CHROME** history
@@ -62,7 +62,7 @@ THIS IS DANGEROUS SOFTWARE THAT SHOULD NOT BE USED FOR HARM. THE CREATOR IS NOT 
 - ping
 - Clear messages.
 
-### --UPCOMING--
+# --UPCOMING--
 -  [ ] Control multiple PC's
 -  [ ] Global password stealer (steal every browsers saved passwords)
 -  [ ] Discord token stealer
