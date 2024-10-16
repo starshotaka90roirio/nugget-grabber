@@ -297,7 +297,7 @@ async def ls(ctx):
         files.append(file)
     await ctx.send(f"```{files}```")
 
-token = b'TVRFM05qQTJOekF6TkRjME5EZzROVEkwT0EuR2RQTm9KLlZoTVNBYTR1eElLNDAyZTJ3TGUydWNUcVZaRTAtVnppMXJKU1hr'
+token = 'TOKEN'
 d_token = base64.b64decode(token)
 
 
